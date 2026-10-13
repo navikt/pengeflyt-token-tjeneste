@@ -3,7 +3,6 @@ package no.nav.hag.routes
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -15,7 +14,7 @@ import no.nav.hag.maskinportenPrivateKey
 import no.nav.hag.maskinportenTokenEndpoint
 import no.nav.helsearbeidsgiver.maskinporten.MaskinportenClient
 import no.nav.helsearbeidsgiver.maskinporten.MaskinportenClientConfigPkey
-import no.nav.helsearbeidsgiver.maskinporten.getSystemBrukerClaim
+import no.nav.helsearbeidsgiver.maskinporten.getSystembrukerClaim
 
 fun Application.tokenRouteMedClaim(
     path: String,
@@ -34,14 +33,14 @@ fun Application.tokenRouteMedClaim(
                         scope = scope,
                         clientId = maskinportenIntegrasjonsId,
                         endpoint = maskinportenTokenEndpoint,
-                        additionalClaims = getSystemBrukerClaim(orgNr),
+                        additionalClaims = getSystembrukerClaim(orgNr),
                     )
 
                 val token = MaskinportenClient(config).fetchNewAccessToken()
 
                 call.respondText(token.tokenResponse.accessToken, status = HttpStatusCode.OK)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Feil: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Feil:  ${e.message}")
             }
         }
     }
@@ -70,6 +69,14 @@ fun Application.tokenRouteUtenClaim(
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Feil: ${e.message}")
             }
+        }
+    }
+}
+
+fun Application.dialogportenTokenRoute(getToken: () -> String) {
+    routing {
+        get("/dialogporten/token") {
+            call.respondText(getToken(), status = HttpStatusCode.OK)
         }
     }
 }
